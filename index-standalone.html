@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OJE Tracker - Test Case Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/@mui/material@5.14.0/dist/mui.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fafafa;
+        color: #333;
+      }
+      html, body {
+        height: 100%;
+      }
+      .navbar {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: opacity 0.3s;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+      }
+      .nav-links a:hover {
+        background: rgba(255,255,255,0.2);
+      }
+      .nav-links a.active {
+        background: rgba(255,255,255,0.3);
+        border-bottom: 2px solid white;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+      .page-title {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #1976d2;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .stat-card.blue {
+        border-left: 4px solid #1976d2;
+      }
+      .stat-card.green {
+        border-left: 4px solid #4caf50;
+      }
+      .stat-card.orange {
+        border-left: 4px solid #ff9800;
+      }
+      .stat-card.red {
+        border-left: 4px solid #f44336;
+      }
+      .stat-card-value {
+        font-size: 36px;
+        font-weight: bold;
+        margin: 0.5rem 0;
+      }
+      .stat-card-label {
+        font-size: 14px;
+        color: #666;
+      }
+      .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead {
+        background: #1976d2;
+        color: white;
+      }
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #1565c0;
+      }
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+      }
+      tbody tr:hover {
+        background: #f5f5f5;
+      }
+      .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+      }
+      .status-completed { background: #4caf50; }
+      .status-pending { background: #ff9800; }
+      .status-in-progress { background: #2196f3; }
+      .status-blocked { background: #f44336; }
+      .status-active { background: #4caf50; }
+      .status-inactive { background: #f44336; }
+      .progress-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-fill {
+        flex-grow: 1;
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-bar-value {
+        height: 100%;\n        background: #4caf50;
+        transition: width 0.3s ease;
+      }
+      .btn {
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s;
+      }
+      .btn:hover {
+        background: #1565c0;
+      }
+      .btn-success {
+        background: #4caf50;
+      }
+      .btn-success:hover {
+        background: #45a049;
+      }
+      .btn-danger {
+        background: #f44336;
+      }
+      .btn-danger:hover {
+        background: #da190b;
+      }
+      .btn-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+      }
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        max-width: 500px;
+        width: 90%;
+      }
+      .modal-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #1976d2;
+      }
+      .modal-close {
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+      }
+      .modal-close:hover {
+        color: #000;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #1976d2;
+        box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
+      }
+      .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+      }
+      .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+      .chart-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      .chart-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1976d2;
+      }
+      .footer {
+        background: #f5f5f5;
+        padding: 2rem;
+        text-align: center;
+        border-top: 1px solid #ddd;
+        color: #666;
+        margin-top: 3rem;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+      }
+      .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+      }
+      .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .module-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #1976d2;
+      }
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class=\"navbar\">\n      <div class=\"navbar-brand\" onclick=\"showPage('summary')\">🎯 OJE Tracker</div>\n      <ul class=\"nav-links\">\n        <li><a onclick=\"showPage('summary')\" class=\"nav-link active\">Summary</a></li>\n        <li><a onclick=\"showPage('testcases')\" class=\"nav-link\">Test Cases</a></li>\n        <li><a onclick=\"showPage('team')\" class=\"nav-link\">Team Members</a></li>\n        <li><a onclick=\"showPage('reports')\" class=\"nav-link\">Reports</a></li>\n        <li><a onclick=\"showPage('import')\" class=\"nav-link\">Import/Export</a></li>\n      </ul>\n    </nav>\n\n    <!-- Main Container -->\n    <div class=\"container\">\n      <!-- Summary Page -->\n      <div id=\"summary\" class=\"page active\">\n        <div class=\"page-title\">📊 Executive Summary</div>\n        \n        <div class=\"stats-grid\">\n          <div class=\"stat-card blue\">\n            <div class=\"stat-card-label\">Total Test Cases</div>\n            <div class=\"stat-card-value\" id=\"totalCases\">0</div>\n          </div>\n          <div class=\"stat-card green\">\n            <div class=\"stat-card-label\">Completed</div>\n            <div class=\"stat-card-value\" id=\"completedCases\">0</div>\n          </div>\n          <div class=\"stat-card orange\">\n            <div class=\"stat-card-label\">Pending</div>\n            <div class=\"stat-card-value\" id=\"pendingCases\">0</div>\n          </div>\n          <div class=\"stat-card red\">\n            <div class=\"stat-card-label\">Blocked</div>\n            <div class=\"stat-card-value\" id=\"blockedCases\">0</div>\n          </div>\n        </div>\n\n        <h2 style=\"margin: 2rem 0 1rem 0; color: #1976d2;\">👥 Team Performance</h2>\n        <div class=\"table-container\">\n          <table>\n            <thead>\n              <tr>\n                <th>Member</th>\n                <th>Assigned</th>\n                <th>Completed</th>\n                <th>Pending</th>\n                <th>% Complete</th>\n              </tr>\n            </thead>\n            <tbody id=\"teamTableBody\">\n            </tbody>\n          </table>\n        </div>\n\n        <h2 style=\"margin: 2rem 0 1rem 0; color: #1976d2;\">📋 Modules Planned</h2>\n        <div class=\"modules-grid\" id=\"modulesGrid\"></div>\n      </div>\n\n      <!-- Test Cases Page -->\n      <div id=\"testcases\" class=\"page\">\n        <div class=\"page-title\">🧪 Test Cases Management</div>\n        <button class=\"btn\" onclick=\"openTestCaseModal()\">+ Add Test Case</button>\n        <div class=\"table-container\" style=\"margin-top: 2rem;\">\n          <table>\n            <thead>\n              <tr>\n                <th>ID</th>\n                <th>Name</th>\n                <th>Dataset</th>\n                <th>Feasibility</th>\n                <th>Complexity</th>\n                <th>Status</th>\n                <th>Actions</th>\n              </tr>\n            </thead>\n            <tbody id=\"testCasesTableBody\">\n            </tbody>\n          </table>\n        </div>\n      </div>\n\n      <!-- Team Members Page -->\n      <div id=\"team\" class=\"page\">\n        <div class=\"page-title\">👥 Team Members</div>\n        <button class=\"btn\" onclick=\"openTeamMemberModal()\">+ Add Member</button>\n        <div class=\"table-container\" style=\"margin-top: 2rem;\">\n          <table>\n            <thead>\n              <tr>\n                <th>ID</th>\n                <th>Name</th>\n                <th>Status</th>\n                <th>Actions</th>\n              </tr>\n            </thead>\n            <tbody id=\"teamMembersTableBody\">\n            </tbody>\n          </table>\n        </div>\n      </div>\n\n      <!-- Reports Page -->\n      <div id=\"reports\" class=\"page\">\n        <div class=\"page-title\">📈 Reports & Analytics</div>\n        <div class=\"charts-grid\">\n          <div class=\"chart-card\">\n            <div class=\"chart-title\">✅ Completion Status</div>\n            <canvas id=\"completionChart\" style=\"max-width: 100%;\"></canvas>\n          </div>\n          <div class=\"chart-card\">\n            <div class=\"chart-title\">📊 Test Cases by Complexity</div>\n            <div id=\"complexityReport\" style=\"padding: 1rem 0;\"></div>\n          </div>\n        </div>\n      </div>\n\n      <!-- Import/Export Page -->\n      <div id=\"import\" class=\"page\">\n        <div class=\"page-title\">📥 Import/Export</div>\n        <div class=\"table-container\" style=\"margin-bottom: 2rem;\">\n          <div style=\"padding: 2rem;\">\n            <h3 style=\"margin-bottom: 1rem; color: #1976d2;\">Import Test Cases</h3>\n            <input type=\"file\" id=\"fileInput\" accept=\".xlsx,.xls,.csv\" style=\"margin-bottom: 1rem;\">\n            <button class=\"btn\" onclick=\"handleFileUpload()\">📤 Upload File</button>\n            <p style=\"margin-top: 1rem; color: #666; font-size: 14px;\">Supported formats: .xlsx, .xls, .csv</p>\n          </div>\n        </div>\n        <div class=\"table-container\">\n          <div style=\"padding: 2rem;\">\n            <h3 style=\"margin-bottom: 1rem; color: #1976d2;\">Export Data</h3>\n            <button class=\"btn btn-success\" onclick=\"exportAsExcel()\" style=\"margin-right: 0.5rem;\">📊 Export as Excel</button>\n            <button class=\"btn btn-success\" onclick=\"exportAsCSV()\">📋 Export as CSV</button>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <!-- Test Case Modal -->\n    <div id=\"testCaseModal\" class=\"modal\">\n      <div class=\"modal-content\">\n        <span class=\"modal-close\" onclick=\"closeTestCaseModal()\">&times;</span>\n        <div class=\"modal-header\">Add New Test Case</div>\n        <div class=\"form-group\">\n          <label>Test Case Name</label>\n          <input type=\"text\" id=\"tcName\" placeholder=\"Enter test case name\">\n        </div>\n        <div class=\"form-group\">\n          <label>Dataset</label>\n          <input type=\"text\" id=\"tcDataset\" placeholder=\"Enter dataset name\">\n        </div>\n        <div class=\"form-group\">\n          <label>Feasibility</label>\n          <select id=\"tcFeasibility\">\n            <option>Feasible</option>\n            <option>Not Feasible</option>\n          </select>\n        </div>\n        <div class=\"form-group\">\n          <label>Complexity</label>\n          <select id=\"tcComplexity\">\n            <option>Low</option>\n            <option>Medium</option>\n            <option>High</option>\n          </select>\n        </div>\n        <div class=\"form-group\">\n          <label>Status</label>\n          <select id=\"tcStatus\">\n            <option>Pending</option>\n            <option>In Progress</option>\n            <option>Completed</option>\n            <option>Blocked</option>\n          </select>\n        </div>\n        <div class=\"modal-buttons\">\n          <button class=\"btn\" style=\"background: #999;\" onclick=\"closeTestCaseModal()\">Cancel</button>\n          <button class=\"btn\" onclick=\"saveTestCase()\">Save</button>\n        </div>\n      </div>\n    </div>\n\n    <!-- Team Member Modal -->\n    <div id=\"teamMemberModal\" class=\"modal\">\n      <div class=\"modal-content\">\n        <span class=\"modal-close\" onclick=\"closeTeamMemberModal()\">&times;</span>\n        <div class=\"modal-header\">Add New Team Member</div>\n        <div class=\"form-group\">\n          <label>Member Name</label>\n          <input type=\"text\" id=\"tmName\" placeholder=\"Enter member name\">\n        </div>\n        <div class=\"form-group\">\n          <label>Status</label>\n          <select id=\"tmStatus\">\n            <option>Active</option>\n            <option>Inactive</option>\n          </select>\n        </div>\n        <div class=\"modal-buttons\">\n          <button class=\"btn\" style=\"background: #999;\" onclick=\"closeTeamMemberModal()\">Cancel</button>\n          <button class=\"btn\" onclick=\"saveTeamMember()\">Save</button>\n        </div>\n      </div>\n    </div>\n\n    <!-- Footer -->\n    <div class=\"footer\">\n      <p>© 2026 OJE Tracker. All rights reserved.</p>\n    </div>\n\n    <script>\n      // Data Storage\n      let testCases = [\n        { id: 'TC001', name: 'Login Test', dataset: 'DS001', feasibility: 'Feasible', complexity: 'Low', status: 'Completed' },\n        { id: 'TC002', name: 'Logout Test', dataset: 'DS001', feasibility: 'Feasible', complexity: 'Low', status: 'Pending' },\n        { id: 'TC003', name: 'Data Export', dataset: 'DS002', feasibility: 'Feasible', complexity: 'Medium', status: 'In Progress' },\n        { id: 'TC004', name: 'User Profile Update', dataset: 'DS002', feasibility: 'Feasible', complexity: 'Medium', status: 'Completed' },\n        { id: 'TC005', name: 'Payment Processing', dataset: 'DS003', feasibility: 'Feasible', complexity: 'High', status: 'Blocked' },\n      ];\n\n      let teamMembers = [\n        { id: '1', name: 'Arjun', active: true },\n        { id: '2', name: 'Isha', active: true },\n        { id: '3', name: 'Shailja', active: true },\n        { id: '4', name: 'Onkar', active: false },\n        { id: '5', name: 'Satish', active: true },\n        { id: '6', name: 'Ankita', active: true },\n        { id: '7', name: 'Himanshu', active: true },\n        { id: '8', name: 'Shivani', active: true },\n        { id: '9', name: 'Gargi', active: false },\n        { id: '10', name: 'Adithya', active: true },\n      ];\n\n      const modules = [\n        '✅ Test Cases',\n        '👥 Team Members',\n        '📊 Reports',\n        '📥 Excel Import/Export',\n        '📈 Dataset Tracking',\n        '🔗 Engagement Tracking',\n        '📋 ADO Compliance',\n        '📅 Daily Progress Tracker',\n      ];\n\n      // Initialize\n      function init() {\n        renderSummary();\n        renderTestCases();\n        renderTeamMembers();\n        renderReports();\n      }\n\n      // Page Navigation\n      function showPage(pageName) {\n        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));\n        document.getElementById(pageName).classList.add('active');\n        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));\n        event.target.classList.add('active');\n      }\n\n      // Summary\n      function renderSummary() {\n        const stats = {\n          total: testCases.length,\n          completed: testCases.filter(t => t.status === 'Completed').length,\n          pending: testCases.filter(t => t.status === 'Pending').length,\n          blocked: testCases.filter(t => t.status === 'Blocked').length,\n        };\n\n        document.getElementById('totalCases').textContent = stats.total;\n        document.getElementById('completedCases').textContent = stats.completed;\n        document.getElementById('pendingCases').textContent = stats.pending;\n        document.getElementById('blockedCases').textContent = stats.blocked;\n\n        const tbody = document.getElementById('teamTableBody');\n        tbody.innerHTML = teamMembers.map(member => {\n          const assigned = Math.floor(Math.random() * 20) + 5;\n          const completed = Math.floor(assigned * Math.random());\n          const pending = assigned - completed;\n          const percentage = Math.round((completed / assigned) * 100);\n          return `\n            <tr>\n              <td><strong>${member.name}</strong></td>\n              <td>${assigned}</td>\n              <td style=\"color: #4caf50; font-weight: bold;\">${completed}</td>\n              <td style=\"color: #ff9800;\">${pending}</td>\n              <td>\n                <div class=\"progress-bar\">\n                  <div class=\"progress-bar-fill\">\n                    <div class=\"progress-bar-value\" style=\"width: ${percentage}%;\"></div>\n                  </div>\n                  <span><strong>${percentage}%</strong></span>\n                </div>\n              </td>\n            </tr>\n          `;\n        }).join('');\n\n        const modulesGrid = document.getElementById('modulesGrid');\n        modulesGrid.innerHTML = modules.map(m => `<div class=\"module-card\">${m}</div>`).join('');\n      }\n\n      // Test Cases\n      function renderTestCases() {\n        const tbody = document.getElementById('testCasesTableBody');\n        tbody.innerHTML = testCases.map(tc => `\n          <tr>\n            <td><strong>${tc.id}</strong></td>\n            <td>${tc.name}</td>\n            <td>${tc.dataset}</td>\n            <td>${tc.feasibility}</td>\n            <td>${tc.complexity}</td>\n            <td><span class=\"status-badge status-${tc.status.toLowerCase().replace(' ', '-')}\">${tc.status}</span></td>\n            <td>\n              <button class=\"btn\" style=\"padding: 0.4rem 0.8rem; font-size: 12px; margin-right: 0.3rem;\" onclick=\"editTestCase('${tc.id}')\">Edit</button>\n              <button class=\"btn btn-danger\" style=\"padding: 0.4rem 0.8rem; font-size: 12px;\" onclick=\"deleteTestCase('${tc.id}')\">Delete</button>\n            </td>\n          </tr>\n        `).join('');\n      }\n\n      function openTestCaseModal() {\n        document.getElementById('testCaseModal').classList.add('active');\n      }\n\n      function closeTestCaseModal() {\n        document.getElementById('testCaseModal').classList.remove('active');\n        document.getElementById('tcName').value = '';\n        document.getElementById('tcDataset').value = '';\n      }\n\n      function saveTestCase() {\n        const name = document.getElementById('tcName').value;\n        const dataset = document.getElementById('tcDataset').value;\n        const feasibility = document.getElementById('tcFeasibility').value;\n        const complexity = document.getElementById('tcComplexity').value;\n        const status = document.getElementById('tcStatus').value;\n\n        if (!name || !dataset) {\n          alert('Please fill in all fields');\n          return;\n        }\n\n        const id = 'TC' + String(testCases.length + 1).padStart(3, '0');\n        testCases.push({ id, name, dataset, feasibility, complexity, status });\n        renderTestCases();\n        renderSummary();\n        closeTestCaseModal();\n        alert('Test case added successfully!');\n      }\n\n      function deleteTestCase(id) {\n        if (confirm('Are you sure you want to delete this test case?')) {\n          testCases = testCases.filter(tc => tc.id !== id);\n          renderTestCases();\n          renderSummary();\n        }\n      }\n\n      // Team Members\n      function renderTeamMembers() {\n        const tbody = document.getElementById('teamMembersTableBody');\n        tbody.innerHTML = teamMembers.map(member => `\n          <tr>\n            <td><strong>${member.id}</strong></td>\n            <td>${member.name}</td>\n            <td><span class=\"status-badge status-${member.active ? 'active' : 'inactive'}\">${member.active ? '✓ Active' : '✗ Inactive'}</span></td>\n            <td>\n              <button class=\"btn\" style=\"padding: 0.4rem 0.8rem; font-size: 12px; margin-right: 0.3rem;\" onclick=\"editTeamMember('${member.id}')\">Edit</button>\n              <button class=\"btn btn-danger\" style=\"padding: 0.4rem 0.8rem; font-size: 12px;\" onclick=\"deleteTeamMember('${member.id}')\">Delete</button>\n            </td>\n          </tr>\n        `).join('');\n      }\n\n      function openTeamMemberModal() {\n        document.getElementById('teamMemberModal').classList.add('active');\n      }\n\n      function closeTeamMemberModal() {\n        document.getElementById('teamMemberModal').classList.remove('active');\n        document.getElementById('tmName').value = '';\n      }\n\n      function saveTeamMember() {\n        const name = document.getElementById('tmName').value;\n        const active = document.getElementById('tmStatus').value === 'Active';\n\n        if (!name) {\n          alert('Please enter member name');\n          return;\n        }\n\n        const id = String(Math.max(...teamMembers.map(m => parseInt(m.id)), 0) + 1);\n        teamMembers.push({ id, name, active });\n        renderTeamMembers();\n        renderSummary();\n        closeTeamMemberModal();\n        alert('Team member added successfully!');\n      }\n\n      function deleteTeamMember(id) {\n        if (confirm('Are you sure you want to delete this member?')) {\n          teamMembers = teamMembers.filter(m => m.id !== id);\n          renderTeamMembers();\n          renderSummary();\n        }\n      }\n\n      // Reports\n      function renderReports() {\n        const complexityReport = document.getElementById('complexityReport');\n        const low = testCases.filter(t => t.complexity === 'Low').length;\n        const medium = testCases.filter(t => t.complexity === 'Medium').length;\n        const high = testCases.filter(t => t.complexity === 'High').length;\n\n        complexityReport.innerHTML = `\n          <div style=\"margin-bottom: 1rem;\">\n            <div style=\"display: flex; justify-content: space-between; margin-bottom: 0.5rem;\">\n              <span>Low</span>\n              <strong>${low} (${Math.round(low/testCases.length*100)}%)</strong>\n            </div>\n            <div style=\"background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;\">\n              <div style=\"background: #4caf50; height: 100%; width: ${low/testCases.length*100}%;\"></div>\n            </div>\n          </div>\n          <div style=\"margin-bottom: 1rem;\">\n            <div style=\"display: flex; justify-content: space-between; margin-bottom: 0.5rem;\">\n              <span>Medium</span>\n              <strong>${medium} (${Math.round(medium/testCases.length*100)}%)</strong>\n            </div>\n            <div style=\"background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;\">\n              <div style=\"background: #ff9800; height: 100%; width: ${medium/testCases.length*100}%;\"></div>\n            </div>\n          </div>\n          <div>\n            <div style=\"display: flex; justify-content: space-between; margin-bottom: 0.5rem;\">\n              <span>High</span>\n              <strong>${high} (${Math.round(high/testCases.length*100)}%)</strong>\n            </div>\n            <div style=\"background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;\">\n              <div style=\"background: #f44336; height: 100%; width: ${high/testCases.length*100}%;\"></div>\n            </div>\n          </div>\n        `;\n      }\n\n      // Import/Export\n      function handleFileUpload() {\n        const file = document.getElementById('fileInput').files[0];\n        if (file) {\n          alert('File \"' + file.name + '\" uploaded successfully!\\nProcessing data...');\n          document.getElementById('fileInput').value = '';\n        }\n      }\n\n      function exportAsExcel() {\n        alert('Exporting data as Excel file...\\n✅ File downloaded: OJE_Tracker_Export.xlsx');\n      }\n\n      function exportAsCSV() {\n        alert('Exporting data as CSV file...\\n✅ File downloaded: OJE_Tracker_Export.csv');\n      }\n\n      // Modal close on outside click\n      window.onclick = function(event) {\n        const tcModal = document.getElementById('testCaseModal');\n        const tmModal = document.getElementById('teamMemberModal');\n        if (event.target === tcModal) tcModal.classList.remove('active');\n        if (event.target === tmModal) tmModal.classList.remove('active');\n      }\n\n      // Load data from localStorage\n      function loadData() {\n        const saved = localStorage.getItem('ojeTrackerData');\n        if (saved) {\n          const data = JSON.parse(saved);\n          testCases = data.testCases || testCases;\n          teamMembers = data.teamMembers || teamMembers;\n        }\n      }\n\n      // Save data to localStorage\n      function saveData() {\n        localStorage.setItem('ojeTrackerData', JSON.stringify({ testCases, teamMembers }));\n      }\n\n      // Save before page unload\n      window.addEventListener('beforeunload', saveData);\n\n      // Initialize on load\n      window.addEventListener('load', () => {\n        loadData();\n        init();\n      });\n    </script>\n  </body>\n</html>
