@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OJE Tracker - Test Case Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #1976d2;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #1976d2;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card.green { border-left-color: #4caf50; }
+        .stat-card.orange { border-left-color: #ff9800; }
+        .stat-card.red { border-left-color: #f44336; }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0.5rem 0;
+            color: #1976d2;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #1976d2;
+            color: white;
+        }
+        
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .badge-completed { background: #4caf50; }
+        .badge-pending { background: #ff9800; }
+        .badge-in-progress { background: #2196f3; }
+        .badge-blocked { background: #f44336; }
+        .badge-active { background: #4caf50; }
+        .badge-inactive { background: #f44336; }
+        
+        .btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #4caf50;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1976d2;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .module-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #1976d2;
+        }
+        
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .progress-fill {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.3s ease;
+        }
+        
+        .footer {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            color: #666;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">🎯 OJE Tracker</div>
+        <ul class="nav-links">
+            <li><a onclick="showPage('summary')" class="nav-link active">Summary</a></li>
+            <li><a onclick="showPage('testcases')" class="nav-link">Test Cases</a></li>
+            <li><a onclick="showPage('team')" class="nav-link">Team Members</a></li>
+            <li><a onclick="showPage('reports')" class="nav-link">Reports</a></li>
+            <li><a onclick="showPage('import')" class="nav-link">Import/Export</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- SUMMARY PAGE -->
+        <div id="summary" class="page active">
+            <div class="page-title">📊 Executive Summary Dashboard</div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Test Cases</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value">2</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value">2</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">Blocked</div>
+                    <div class="stat-value">1</div>
+                </div>
+            </div>
+
+            <h2 style="margin: 2rem 0 1rem 0; color: #1976d2;">👥 Team Performance</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Assigned</th>
+                            <th>Completed</th>
+                            <th>Pending</th>
+                            <th>% Complete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Arjun</strong></td>
+                            <td>12</td>
+                            <td style="color: #4caf50; font-weight: bold;">8</td>
+                            <td>4</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill"><div class="progress-value" style="width: 67%;"></div></div>
+                                    <span><strong>67%</strong></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Isha</strong></td>
+                            <td>10</td>
+                            <td style="color: #4caf50; font-weight: bold;">6</td>
+                            <td>4</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill"><div class="progress-value" style="width: 60%;"></div></div>
+                                    <span><strong>60%</strong></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Shailja</strong></td>
+                            <td>15</td>
+                            <td style="color: #4caf50; font-weight: bold;">10</td>
+                            <td>5</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill"><div class="progress-value" style="width: 67%;"></div></div>
+                                    <span><strong>67%</strong></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 style="margin: 2rem 0 1rem 0; color: #1976d2;">📋 Modules Planned</h2>
+            <div class="modules-grid">
+                <div class="module-card">✅ Test Cases</div>
+                <div class="module-card">👥 Team Members</div>
+                <div class="module-card">📊 Reports</div>
+                <div class="module-card">📥 Excel Import/Export</div>
+                <div class="module-card">📈 Dataset Tracking</div>
+                <div class="module-card">🔗 Engagement Tracking</div>
+            </div>
+        </div>
+
+        <!-- TEST CASES PAGE -->
+        <div id="testcases" class="page">
+            <div class="page-title">🧪 Test Cases Management</div>
+            <button class="btn" onclick="openTestCaseModal()">+ Add Test Case</button>
+            
+            <div class="table-container" style="margin-top: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test Case ID</th>
+                            <th>Name</th>
+                            <th>Dataset</th>
+                            <th>Complexity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>TC001</strong></td>
+                            <td>Login Test</td>
+                            <td>DS001</td>
+                            <td>Low</td>
+                            <td><span class="badge badge-completed">✓ Completed</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>TC002</strong></td>
+                            <td>Logout Test</td>
+                            <td>DS001</td>
+                            <td>Low</td>
+                            <td><span class="badge badge-pending">⏰ Pending</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>TC003</strong></td>
+                            <td>Data Export</td>
+                            <td>DS002</td>
+                            <td>Medium</td>
+                            <td><span class="badge badge-in-progress">🔄 In Progress</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM MEMBERS PAGE -->
+        <div id="team" class="page">
+            <div class="page-title">👥 Team Members</div>
+            <button class="btn" onclick="openTeamModal()">+ Add Member</button>
+            
+            <div class="table-container" style="margin-top: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><strong>Arjun</strong></td>
+                            <td><span class="badge badge-active">✓ Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><strong>Isha</strong></td>
+                            <td><span class="badge badge-active">✓ Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><strong>Shailja</strong></td>
+                            <td><span class="badge badge-active">✓ Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><strong>Onkar</strong></td>
+                            <td><span class="badge badge-inactive">✗ Inactive</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 12px; margin-right: 0.3rem;">Edit</button>
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REPORTS PAGE -->
+        <div id="reports" class="page">
+            <div class="page-title">📈 Reports & Analytics</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div class="table-container">
+                    <div style="padding: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: #1976d2;">📊 Test Case Status</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Completed</span>
+                                    <strong>2 (40%)</strong>
+                                </div>
+                                <div style="background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div style="background: #4caf50; height: 100%; width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>In Progress</span>
+                                    <strong>1 (20%)</strong>
+                                </div>
+                                <div style="background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div style="background: #2196f3; height: 100%; width: 20%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Pending</span>
+                                    <strong>1 (20%)</strong>
+                                </div>
+                                <div style="background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div style="background: #ff9800; height: 100%; width: 20%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Blocked</span>
+                                    <strong>1 (20%)</strong>
+                                </div>
+                                <div style="background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div style="background: #f44336; height: 100%; width: 20%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div style="padding: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: #1976d2;">📈 Team Performance (Top 5)</h3>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Member</th>
+                                    <th style="text-align: right;">Completed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Shailja</td>
+                                    <td style="text-align: right; font-weight: bold; color: #4caf50;">10</td>
+                                </tr>
+                                <tr>
+                                    <td>Arjun</td>
+                                    <td style="text-align: right; font-weight: bold; color: #4caf50;">8</td>
+                                </tr>
+                                <tr>
+                                    <td>Isha</td>
+                                    <td style="text-align: right; font-weight: bold; color: #4caf50;">6</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- IMPORT/EXPORT PAGE -->
+        <div id="import" class="page">
+            <div class="page-title">📥 Import/Export Excel</div>
+            
+            <div class="table-container" style="margin-bottom: 2rem;">
+                <div style="padding: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: #1976d2;">📤 Import Test Cases</h3>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="margin-bottom: 1rem; padding: 0.6rem;">
+                    <button class="btn" onclick="alert('File upload demo - select a file first')">Upload File</button>
+                    <p style="margin-top: 1rem; color: #666; font-size: 14px;">Supported formats: .xlsx, .xls, .csv</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="padding: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: #1976d2;">📊 Export Data</h3>
+                    <button class="btn btn-success" onclick="alert('Excel file downloaded: OJE_Tracker.xlsx')" style="margin-right: 0.5rem;">Export as Excel</button>
+                    <button class="btn btn-success" onclick="alert('CSV file downloaded: OJE_Tracker.csv')">Export as CSV</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Case Modal -->
+    <div id="testCaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">➕ Add New Test Case</div>
+            <div class="form-group">
+                <label>Test Case Name</label>
+                <input type="text" placeholder="Enter test case name">
+            </div>
+            <div class="form-group">
+                <label>Dataset</label>
+                <input type="text" placeholder="Enter dataset name">
+            </div>
+            <div class="form-group">
+                <label>Complexity</label>
+                <select>
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select>
+                    <option>Pending</option>
+                    <option>In Progress</option>
+                    <option>Completed</option>
+                    <option>Blocked</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" style="background: #999;" onclick="closeTestCaseModal()">Cancel</button>
+                <button class="btn" onclick="alert('Test Case Added!'); closeTestCaseModal();">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Member Modal -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">➕ Add New Team Member</div>
+            <div class="form-group">
+                <label>Member Name</label>
+                <input type="text" placeholder="Enter member name">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" style="background: #999;" onclick="closeTeamModal()">Cancel</button>
+                <button class="btn" onclick="alert('Team Member Added!'); closeTeamModal();">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2026 OJE Tracker - Test Case Management System</p>
+    </div>
+
+    <script>
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function openTestCaseModal() {
+            document.getElementById('testCaseModal').classList.add('active');
+        }
+
+        function closeTestCaseModal() {
+            document.getElementById('testCaseModal').classList.remove('active');
+        }
+
+        function openTeamModal() {
+            document.getElementById('teamModal').classList.add('active');
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            const testCaseModal = document.getElementById('testCaseModal');
+            const teamModal = document.getElementById('teamModal');
+            if (event.target === testCaseModal) testCaseModal.classList.remove('active');
+            if (event.target === teamModal) teamModal.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
